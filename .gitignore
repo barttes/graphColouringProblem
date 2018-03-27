@@ -1,2 +1,3 @@
 *.txt
+!GraphColouring/graphsToColour/sampleGraphToImport.txt
 /GraphColouring/build/
