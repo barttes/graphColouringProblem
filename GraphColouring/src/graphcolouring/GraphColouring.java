@@ -1,8 +1,6 @@
 package graphcolouring;
 
 import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Random;
 import java.util.Scanner;
 
@@ -40,11 +38,14 @@ public class GraphColouring {
             System.out.println("\t[6] - open generated graph (edge list)");
             System.out.println("\t----------------ALGORITHMS-------------------------------------------------");
             System.out.println("\t[7] - use greedy algorithm to find chromatic number");
-            System.out.println("\t[8] - use brute force algorithm to find chromatic number");
-            System.out.println("\t[9] - generate to first difference");
+            System.out.println("\t[8] - use greedy SF/LF algorithm to find chromatic number");
+            System.out.println("\t[9] - use brute force algorithm to find chromatic number");
+            System.out.println("\t----------------UTILITY FUNCTIONS------------------------------------------");
+            System.out.println("\t[10] - generate to first difference");
+            System.out.println("\t[11] - info about graph");
             
             choice = sc.nextInt(); //read input from user
-            String filePath;
+            String filePath = "graphsToColour/";
             
             switch (choice) {
                 case 0:
@@ -75,7 +76,7 @@ public class GraphColouring {
                     if (g1.getNumV() != 0) {
                         System.out.println("Give a name of the file: ");
                         sc.nextLine();
-                        filePath = sc.nextLine();
+                        filePath += sc.nextLine();
                         FilesIO.saveGraphAsEL(filePath, g1);
                     } else {
                         System.out.println("There is no graph to save!");
@@ -85,7 +86,7 @@ public class GraphColouring {
                 case 6:
                     System.out.println("Give a name of the file: ");
                     sc.nextLine();
-                    filePath = sc.nextLine();
+                    filePath += sc.nextLine();
                     g1 = FilesIO.openGraphAsEL(filePath);
                     
                     break;
@@ -93,17 +94,47 @@ public class GraphColouring {
                     /*
                         Greedy algorithm to find first possible graph coloring
                     */
-
                 case 7:
                     nC = g1.colorGreedy();
                     System.out.println("Greedy algorith: The graph has been colored with <<<"+nC+">>>");
                     System.out.println("Do you want to show colors of vertices? [1 - yes; 0 - no]");
                     sc.nextLine();
                     if ( (choice = sc.nextInt()) == 1) {
-                        for (i = 0; i<g1.getNumV(); i++) {
-                            System.out.println((i+1)+"# vertex has color: " + g1.getArrayOfColorsGreedy()[i]);
+                        g1.showGreedyColouring();
+                    }
+                    choice = -1;
+                    
+                    break;
+                    
+                    /*
+                        Improved greedy algorithm. It sorts vertices by degree of each vertex descendig, 
+                        or ascending then with that order colour it using greedy algorithm.
+                    */
+                case 8:
+                    vertexColoringOrder = new int[g1.getNumV()];
+                    
+                    System.out.println("Do you want to sort vertices by vertex degree ASC [0] or DESC [1]?");
+                    sc.nextLine();
+                    if ( (choice = sc.nextInt()) == 1) {
+                        for (i=(g1.getNumV()-1); i>=0; i--) {
+                            vertexColoringOrder[g1.getNumV()-i-1] = g1.getVertexDegree()[i][0];
+                        }
+                    } else {
+                        for (i=0; i<g1.getNumV(); i++) {
+                            vertexColoringOrder[i] = g1.getVertexDegree()[i][0];
                         }
                     }
+                                                       
+                    g1.colorGreedy(vertexColoringOrder);
+                    nC = g1.getChromaticNumberFoundGreedyIm();
+                    
+                    System.out.println("Greedy improved algorith: The graph has been colored with <<<"+nC+">>>");
+                    System.out.println("Do you want to show colors of vertices? [1 - yes; 0 - no]");
+                    sc.nextLine();
+                    if ( (choice = sc.nextInt()) == 1) {
+                        g1.showGreedyImColouring();
+                    }
+                    
                     choice = -1;
                     
                     break;
@@ -113,8 +144,7 @@ public class GraphColouring {
                         vertices in all possible orders. Algorith sets chromatic number as the smallest possible coloring
                         of graph.
                     */
-                    
-                case 8:
+                case 9:
                     vertexColoringOrder = new int[g1.getNumV()];
                     
                     //initialize standard vertex coloring order 1,2...num of vertex
@@ -123,33 +153,25 @@ public class GraphColouring {
                     }
                     
                     g1.permuteAndColor(vertexColoringOrder, vertexColoringOrder.length);
-                    nC = g1.getChromaticNumberFoundBF2();
+                    nC = g1.getChromaticNumberFoundGreedyIm();
                     
                     System.out.println("Brute force algorith: The graph has been colored with <<<"+nC+">>>");
                     System.out.println("Do you want to show colors of vertices? [1 - yes; 0 - no]");
                     sc.nextLine();
                     if ( (choice = sc.nextInt()) == 1) {
                         for (i = 0; i<g1.getNumV(); i++) {
-                            System.out.println((i+1)+"# vertex has color: " + g1.getArrayOfColorsBF2()[i]);
+                            System.out.println((i+1)+"# vertex has color: " + g1.getArrayOfColorsGreedyIm()[i]);
                         }
                     }
                     choice = -1;
-                    
-
-                    /*nC = g1.colorBF();
-                    System.out.println("Brute force algorith: The graph has been colored with <<<"+nC+">>>");
-                    System.out.println("Do you want to show colors of vertices? [1 - yes; 0 - no]");
-                    sc.nextLine();
-                    if ( (choice = sc.nextInt()) == 1) {
-                        for (i = 0; i<g1.getNumV(); i++) {
-                            System.out.println((i+1)+"# vertex has color: " + g1.getArrayOfColorsBF()[i]);
-                        }
-                    }
-                    choice = -1;*/
-                    
+                                        
                     break;
                     
-                case 9:
+                    /*
+                        Generate instance and check if it has differences in greedy and brute force colouring
+                    */
+                    
+                case 10:
                     System.out.println("Give number of vertices");
                     numOfVertices = sc.nextInt();
                     vertexColoringOrder = new int[numOfVertices];
@@ -163,11 +185,19 @@ public class GraphColouring {
                         }
 
                         g1.permuteAndColor(vertexColoringOrder, vertexColoringOrder.length);
-                        System.out.println("Brute force: "+g1.getChromaticNumberFoundBF2());
+                        System.out.println("Brute force: "+g1.getChromaticNumberFoundGreedyIm());
                         nC = g1.colorGreedy();
                         System.out.println("Greedy: "+nC);
-                    } while (g1.getChromaticNumberFoundBF2() == nC);
+                    } while (g1.getChromaticNumberFoundGreedyIm() == nC);
                     System.out.println("Graph with differences has been found!");
+                    
+                    choice = -1;
+ 
+                    break;
+                    
+                case 11:
+                    System.out.println("Graph information:");
+                    System.out.println(g1.toString());
                     
                     choice = -1;
  
@@ -186,67 +216,49 @@ public class GraphColouring {
     private static Graph graphGenerator(int v, int e) {
         Graph tempG = new Graph();
         int numOfEdges, numOfVertices, maxOfVertices, minOfVertices, maxOfEdges, minOfEdges, i, v1, v2, edgesLeft; //graph atributes, etc. 
-        Random rand;
+        Random rand = new Random();
         
         if (v==0) {
             numOfEdges = e;
             maxOfVertices = numOfEdges + 1;
             minOfVertices = (int) Math.ceil((1 + Math.sqrt(1 + 8 * numOfEdges)) / 2);
+            
+            System.out.println("Maximum number of vertices:" + maxOfVertices);
+            System.out.println("Minimum number of vertices:" + minOfVertices);
 
-            rand = new Random();
             numOfVertices = rand.nextInt(maxOfVertices - minOfVertices) + minOfVertices;
-            
-            //System.out.println("Maximum number of vertices:" + maxOfVertices);
-            //System.out.println("Minimum number of vertices:" + minOfVertices);
-            //System.out.println("Graph consists of: [" + numOfVertices +"] vartices and: ["+numOfEdges+"] edges");
-            
-            tempG = new Graph(numOfVertices, numOfEdges);
-            
-            //ensure that all vertex has connection to the graph
-            for (i = 1; i <= numOfVertices; i++ ) {
-                while ( ((v1 = rand.nextInt(numOfVertices) + 1) == i) || (tempG.getListOfEdges(i).contains(v1)));                     
-                tempG.addEdge(i, v1);
-                GraphColouring.workingStatus(i, "Graph generating");
-            }
-
-            //generate the rest connections
-            edgesLeft = numOfEdges - numOfVertices;
-            for (i = 1; i<=edgesLeft; i++) {
-                v1 = rand.nextInt(numOfVertices) + 1;
-                while ( ((v2 = rand.nextInt(numOfVertices) + 1) == v1) || (tempG.getListOfEdges(v1).contains(v2)));
-                tempG.addEdge(v1, v2);
-                GraphColouring.workingStatus(i, "Graph generating");
-            }
-            
-        } else if (e==0) {
+        } else {
             numOfVertices = v;
             minOfEdges = numOfVertices - 1;
             maxOfEdges = (int) Math.ceil((numOfVertices*(numOfVertices-1)) / 2);
-
-            rand = new Random();
-            numOfEdges = rand.nextInt(maxOfEdges - minOfEdges) + minOfEdges;
-
-            //System.out.println("Maximum number of edges:" + maxOfEdges);
-            //System.out.println("Minimum number of edges:" + minOfEdges);
             
-            tempG = new Graph(numOfVertices, numOfEdges);
-                    
-            //ensure that all vertex has connection to the graph
-            for (i = 1; i <= numOfVertices; i++ ) {
-                while ( ((v1 = rand.nextInt(numOfVertices) + 1) == i) || (tempG.getListOfEdges(i).contains(v1)));                     
-                tempG.addEdge(i, v1);
-                GraphColouring.workingStatus(i, "Graph generating");
-            }
+            System.out.println("Maximum number of edges:" + maxOfEdges);
+            System.out.println("Minimum number of edges:" + maxOfEdges);
 
-            edgesLeft = numOfEdges - numOfVertices;
+            numOfEdges = rand.nextInt(maxOfEdges - minOfEdges) + minOfEdges;
+        }
+        
+        System.out.println("Graph consists of: [" + numOfVertices +"] vartices and: ["+numOfEdges+"] edges");
 
-            //generate the rest connections
-            for (i = 1; i<=edgesLeft; i++) {
-                v1 = rand.nextInt(numOfVertices) + 1;
-                while ( ((v2 = rand.nextInt(numOfVertices) + 1) == v1) || (tempG.getListOfEdges(v1).contains(v2)));
-                tempG.addEdge(v1, v2);
-                GraphColouring.workingStatus(i, "Graph generating");
-            }
+        tempG = new Graph(numOfVertices, numOfEdges);
+
+        //ensure that all vertex has connection to the graph - conect all vertices together
+        for (i = 1; i < numOfVertices && i <= numOfEdges; i++ ) {                      
+            tempG.addEdge(i, i+1);
+            //System.out.println("Adding edge:"+i+"->"+(i+1));
+            //GraphColouring.workingStatus(i, "Graph generating");
+        }
+
+        edgesLeft = numOfEdges - numOfVertices;
+
+        //generate the rest, random connections
+        for (i = 0; i<=edgesLeft; i++) {
+            //ensure that vertex won't connect to itself and there won't be double vertex connection
+            while ( ( (v1 = rand.nextInt(numOfVertices) + 1) == (v2 = rand.nextInt(numOfVertices) + 1) ) || 
+                    (tempG.getListOfEdges(v1).contains(v2)) );
+            tempG.addEdge(v1, v2);
+            //System.out.println("Adding edge:"+v1+"->"+v2);
+            //GraphColouring.workingStatus(i, "Graph generating");
         }
         
         

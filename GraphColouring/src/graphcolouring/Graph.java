@@ -17,12 +17,11 @@ public class Graph {
     private Map<Integer, List<Integer>> adjList; //adjacency list
     private int[] arrayOfColorsGreedy;
     private int chromaticNumberFoundGreedy;
-    private int[] arrayOfColorsBF;
-    private int chromaticNumberFoundBF;
-    private int[] arrayOfColorsBF2;
-    private int chromaticNumberFoundBF2 = 0;
+    private int[] arrayOfColorsGreedyIm;
+    private int chromaticNumberFoundGreedyIm = 0;
     private int numV;
     private int numE;
+    private int[][] vertexDegree; 
     
     //=============CONSTRUCTORS================
     
@@ -31,10 +30,10 @@ public class Graph {
     
     public Graph(int v) {
         this.numV = v;
+        vertexDegree = new int[this.getNumV()][2];
         adjList = new HashMap<>();
         arrayOfColorsGreedy = new int[this.numV];
-        arrayOfColorsBF = new int[this.numV];
-        arrayOfColorsBF2 = new int[this.numV];
+        arrayOfColorsGreedyIm = new int[this.numV];
         
         for(int i = 1; i <= v; i++) {
             adjList.put(i, new LinkedList<Integer>());
@@ -44,10 +43,10 @@ public class Graph {
     public Graph(int v, int e) {
         this.numV = v;
         this.numE = e;
+        vertexDegree = new int[this.getNumV()][2];
         adjList = new HashMap<>();
         arrayOfColorsGreedy = new int[this.numV];
-        arrayOfColorsBF = new int[this.numV];
-        arrayOfColorsBF2 = new int[this.numV];
+        arrayOfColorsGreedyIm = new int[this.numV];
         
         for(int i = 1; i <= v; i++) {
             adjList.put(i, new LinkedList<Integer>());
@@ -90,24 +89,31 @@ public class Graph {
     }
     
     /**
-     * @return the arrayOfColorsBF
-     */
-    public int[] getArrayOfColorsBF() {
-        return arrayOfColorsBF;
-    }
-    
-    /**
      * @return the chromaticNumberFoundBF2
      */
-    public int getChromaticNumberFoundBF2() {
-        return chromaticNumberFoundBF2;
+    public int getChromaticNumberFoundGreedyIm() {
+        return chromaticNumberFoundGreedyIm;
     }
     
     /**
      * @return the arrayOfColorsBF2
      */
-    public int[] getArrayOfColorsBF2() {
-        return arrayOfColorsBF2;
+    public int[] getArrayOfColorsGreedyIm() {
+        return arrayOfColorsGreedyIm;
+    }
+    
+    /**
+     * @return the vertexDegree
+     */
+    public int[][] getVertexDegree() {
+        return vertexDegree;
+    }
+    
+    /**
+     * @return the numE
+     */
+    public int getNumE() {
+        return numE;
     }
     
     //================GRAPH MODIFICATION METHODS================
@@ -124,11 +130,48 @@ public class Graph {
         }
     }
     
+    public void initializeVerticesDegrees(){
+        //initialize array of vertices degree
+        for (int i = 0; i<this.getVertexDegree().length; i++) {
+            vertexDegree[i][0] = (i+1);
+            vertexDegree[i][1] = this.getListOfEdges(i+1).size();
+        }
+        
+        //sort vertices by degrees
+        Arrays.sort(this.getVertexDegree(), (a, b) -> Integer.compare(a[1], b[1]));
+    }
+    
     //================UTILITY METHODS================
+    
+    @Override
+    public String toString(){
+        String output = "";
+        
+        //graph density for undirected graph is: 2E / V * (V-1)
+        float density = (float)(2*numE)/(numV*(numV-1));
+        
+        int maxDeegree, minDeegree;
+        if ( (maxDeegree = this.getVertexDegree()[this.getNumV()-1][1]) == 0) {
+            this.initializeVerticesDegrees();
+            maxDeegree = this.getVertexDegree()[this.getNumV()-1][1];
+            minDeegree = this.getVertexDegree()[0][1];
+        } else {
+            maxDeegree = this.getVertexDegree()[this.getNumV()-1][1];
+            minDeegree = this.getVertexDegree()[0][1];
+        }
+        
+        output = output + "Number of vertices: " + this.getNumV() + "\n";
+        output = output + "Number of edges: " + this.getNumE() + "\n";
+        output = output + "Graph density: " + Float.toString(density) + "\n";
+        output = output + "Max vertex deegree: " + maxDeegree + "\n";
+        output = output + "Min vertex deegree: " + minDeegree + "\n";
+        
+        return output;
+    }
     
     public String showAdjacencyList() {
         String output = "Number of vertices: " + Integer.toString(getNumV()) + "\n";
-        output = output + "Number of edges: " + Integer.toString(numE) + "\n";
+        output = output + "Number of edges: " + Integer.toString(getNumE()) + "\n";
         for (int i = 1; i<=getNumV(); i++) {
             output = output + Integer.toString(i) + " " + this.getListOfEdges(i).toString() + "\n";
         }
@@ -148,6 +191,18 @@ public class Graph {
         }
         
         return output;
+    }
+    
+    public void showGreedyColouring() {
+        for (int i = 0; i<this.getNumV(); i++) {
+            System.out.println((i+1)+"# vertex has color: " + this.getArrayOfColorsGreedy()[i]);
+        }
+    }
+    
+    public void showGreedyImColouring() {
+        for (int i = 0; i<this.getNumV(); i++) {
+            System.out.println((i+1)+"# vertex has color: " + this.getArrayOfColorsGreedyIm()[i]);
+        }
     }
     
     //================GRAPH COLORING METHODS================
@@ -246,58 +301,15 @@ public class Graph {
             if ( (tempColorArray[vertexColoringOrder[i]-1] = j) > numOfColors ) { numOfColors=j;}
         }
         
-        //set new values to chromaticNumber and arrayOfColorsBF if generated 
-        if (this.chromaticNumberFoundBF2 == 0) {
-            this.arrayOfColorsBF2 = tempColorArray;
-            this.chromaticNumberFoundBF2 = numOfColors+1;
+        //set new values to chromaticNumber and arrayOfColorsGreedy if generated 
+        if (this.chromaticNumberFoundGreedyIm == 0) {
+            this.arrayOfColorsGreedyIm = tempColorArray;
+            this.chromaticNumberFoundGreedyIm = numOfColors+1;
         }
-        if (numOfColors+1 < this.getChromaticNumberFoundBF2()) {
-            this.arrayOfColorsBF2 = tempColorArray;
-            this.chromaticNumberFoundBF2 = numOfColors+1;
+        if (numOfColors+1 < this.getChromaticNumberFoundGreedyIm()) {
+            this.arrayOfColorsGreedyIm = tempColorArray;
+            this.chromaticNumberFoundGreedyIm = numOfColors+1;
         }
     }
-    
-    /*
-    public int colorBF() {
-        int[] tempColorArray = new int[this.getNumV()];
-        Arrays.fill(tempColorArray, 0);
-        int b = 2, bc = 2, i, v;
-        boolean test;
-        
-        while (true) {
-            if (bc!=0) {
-                test = true;
-                for(v = 0; v < this.numV; v++)      // Przeglądamy wierzchołki grafu
-                {
-                  for(int conVertex : this.getListOfEdges(v+1)) // Przeglądamy sąsiadów wierzchołka v
-                    if(tempColorArray[v] == tempColorArray[conVertex-1])   // Testujemy pokolorowanie
-                    {
-                      test = false;         // Zaznaczamy porażkę
-                      break;                // Opuszczamy pętlę for
-                    }
-                  if(!test) break;          // Opuszczamy pętlę for
-                }
-                if(test) break;             // Kombinacja znaleziona, kończymy pętlę główną
-            }
-             while(true)                   // Pętla modyfikacji licznika
-            {
-               for(i = 0; i < this.numV; i++)
-               {
-                tempColorArray[i]++;                 // Zwiększamy cyfrę
-                 if(tempColorArray[i] == b - 1) bc++;
-                 if(tempColorArray[i] < b) break;
-                 tempColorArray[i] = 0;               // Zerujemy cyfrę
-                 bc--;
-               }
-
-               if(i < this.numV) break;           // Wychodzimy z pętli zwiększania licznika
-               b++;                       // Licznik się przewinął, zwiększamy bazę
-            }
-        }
-        
-        this.arrayOfColorsBF = tempColorArray;
-        return b;
-    }
-    */
 
 }
