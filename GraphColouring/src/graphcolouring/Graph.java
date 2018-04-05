@@ -17,8 +17,8 @@ public class Graph {
     private Map<Integer, List<Integer>> adjList; //adjacency list
     private int[] arrayOfColorsGreedy;
     private int chromaticNumberFoundGreedy;
-    private int[] arrayOfColorsGreedyIm;
-    private int chromaticNumberFoundGreedyIm = 0;
+    private int[] arrayOfColorsGreedyLFBF;
+    private int chromaticNumberFoundGreedyLFBF = 0;
     private int numV;
     private int numE;
     private int[][] vertexDegree; 
@@ -33,7 +33,7 @@ public class Graph {
         vertexDegree = new int[this.getNumV()][2];
         adjList = new HashMap<>();
         arrayOfColorsGreedy = new int[this.numV];
-        arrayOfColorsGreedyIm = new int[this.numV];
+        arrayOfColorsGreedyLFBF = new int[this.numV];
         
         for(int i = 1; i <= v; i++) {
             adjList.put(i, new LinkedList<Integer>());
@@ -46,7 +46,7 @@ public class Graph {
         vertexDegree = new int[this.getNumV()][2];
         adjList = new HashMap<>();
         arrayOfColorsGreedy = new int[this.numV];
-        arrayOfColorsGreedyIm = new int[this.numV];
+        arrayOfColorsGreedyLFBF = new int[this.numV];
         
         for(int i = 1; i <= v; i++) {
             adjList.put(i, new LinkedList<Integer>());
@@ -91,15 +91,15 @@ public class Graph {
     /**
      * @return the chromaticNumberFoundBF2
      */
-    public int getChromaticNumberFoundGreedyIm() {
-        return chromaticNumberFoundGreedyIm;
+    public int getChromaticNumberFoundGreedyLFBF() {
+        return chromaticNumberFoundGreedyLFBF;
     }
     
     /**
      * @return the arrayOfColorsBF2
      */
-    public int[] getArrayOfColorsGreedyIm() {
-        return arrayOfColorsGreedyIm;
+    public int[] getArrayOfColorsGreedyLFBF() {
+        return arrayOfColorsGreedyLFBF;
     }
     
     /**
@@ -199,9 +199,9 @@ public class Graph {
         }
     }
     
-    public void showGreedyImColouring() {
+    public void showGreedyLFColouring() {
         for (int i = 0; i<this.getNumV(); i++) {
-            System.out.println((i+1)+"# vertex has color: " + this.getArrayOfColorsGreedyIm()[i]);
+            System.out.println((i+1)+"# vertex has color: " + this.getArrayOfColorsGreedyLFBF()[i]);
         }
     }
     
@@ -302,13 +302,13 @@ public class Graph {
         }
         
         //set new values to chromaticNumber and arrayOfColorsGreedy if generated 
-        if (this.chromaticNumberFoundGreedyIm == 0) {
-            this.arrayOfColorsGreedyIm = tempColorArray;
-            this.chromaticNumberFoundGreedyIm = numOfColors+1;
+        if (this.chromaticNumberFoundGreedyLFBF == 0) {
+            this.arrayOfColorsGreedyLFBF = tempColorArray;
+            this.chromaticNumberFoundGreedyLFBF = numOfColors+1;
         }
-        if (numOfColors+1 < this.getChromaticNumberFoundGreedyIm()) {
-            this.arrayOfColorsGreedyIm = tempColorArray;
-            this.chromaticNumberFoundGreedyIm = numOfColors+1;
+        if (numOfColors+1 < this.getChromaticNumberFoundGreedyLFBF()) {
+            this.arrayOfColorsGreedyLFBF = tempColorArray;
+            this.chromaticNumberFoundGreedyLFBF = numOfColors+1;
         }
     }
 

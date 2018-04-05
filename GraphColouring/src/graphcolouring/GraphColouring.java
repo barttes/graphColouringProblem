@@ -38,7 +38,7 @@ public class GraphColouring {
             System.out.println("\t[6] - open generated graph (edge list)");
             System.out.println("\t----------------ALGORITHMS-------------------------------------------------");
             System.out.println("\t[7] - use greedy algorithm to find chromatic number");
-            System.out.println("\t[8] - use greedy SF/LF algorithm to find chromatic number");
+            System.out.println("\t[8] - use greedy LF algorithm to find chromatic number");
             System.out.println("\t[9] - use brute force algorithm to find chromatic number");
             System.out.println("\t----------------UTILITY FUNCTIONS------------------------------------------");
             System.out.println("\t[10] - generate to first difference");
@@ -113,26 +113,18 @@ public class GraphColouring {
                 case 8:
                     vertexColoringOrder = new int[g1.getNumV()];
                     
-                    System.out.println("Do you want to sort vertices by vertex degree ASC [0] or DESC [1]?");
-                    sc.nextLine();
-                    if ( (choice = sc.nextInt()) == 1) {
-                        for (i=(g1.getNumV()-1); i>=0; i--) {
-                            vertexColoringOrder[g1.getNumV()-i-1] = g1.getVertexDegree()[i][0];
-                        }
-                    } else {
-                        for (i=0; i<g1.getNumV(); i++) {
-                            vertexColoringOrder[i] = g1.getVertexDegree()[i][0];
-                        }
+                    for (i=(g1.getNumV()-1); i>=0; i--) {
+                        vertexColoringOrder[g1.getNumV()-i-1] = g1.getVertexDegree()[i][0];
                     }
-                                                       
+                             
                     g1.colorGreedy(vertexColoringOrder);
-                    nC = g1.getChromaticNumberFoundGreedyIm();
+                    nC = g1.getChromaticNumberFoundGreedyLFBF();
                     
-                    System.out.println("Greedy improved algorith: The graph has been colored with <<<"+nC+">>>");
+                    System.out.println("Greedy LF algorith: The graph has been colored with <<<"+nC+">>>");
                     System.out.println("Do you want to show colors of vertices? [1 - yes; 0 - no]");
                     sc.nextLine();
                     if ( (choice = sc.nextInt()) == 1) {
-                        g1.showGreedyImColouring();
+                        g1.showGreedyLFColouring();
                     }
                     
                     choice = -1;
@@ -153,14 +145,14 @@ public class GraphColouring {
                     }
                     
                     g1.permuteAndColor(vertexColoringOrder, vertexColoringOrder.length);
-                    nC = g1.getChromaticNumberFoundGreedyIm();
+                    nC = g1.getChromaticNumberFoundGreedyLFBF();
                     
                     System.out.println("Brute force algorith: The graph has been colored with <<<"+nC+">>>");
                     System.out.println("Do you want to show colors of vertices? [1 - yes; 0 - no]");
                     sc.nextLine();
                     if ( (choice = sc.nextInt()) == 1) {
                         for (i = 0; i<g1.getNumV(); i++) {
-                            System.out.println((i+1)+"# vertex has color: " + g1.getArrayOfColorsGreedyIm()[i]);
+                            System.out.println((i+1)+"# vertex has color: " + g1.getArrayOfColorsGreedyLFBF()[i]);
                         }
                     }
                     choice = -1;
@@ -185,10 +177,10 @@ public class GraphColouring {
                         }
 
                         g1.permuteAndColor(vertexColoringOrder, vertexColoringOrder.length);
-                        System.out.println("Brute force: "+g1.getChromaticNumberFoundGreedyIm());
+                        System.out.println("Brute force: "+g1.getChromaticNumberFoundGreedyLFBF());
                         nC = g1.colorGreedy();
                         System.out.println("Greedy: "+nC);
-                    } while (g1.getChromaticNumberFoundGreedyIm() == nC);
+                    } while (g1.getChromaticNumberFoundGreedyLFBF() == nC);
                     System.out.println("Graph with differences has been found!");
                     
                     choice = -1;
@@ -229,11 +221,11 @@ public class GraphColouring {
             numOfVertices = rand.nextInt(maxOfVertices - minOfVertices) + minOfVertices;
         } else {
             numOfVertices = v;
-            minOfEdges = numOfVertices - 1;
-            maxOfEdges = (int) Math.ceil((numOfVertices*(numOfVertices-1)) / 2);
+            minOfEdges = v - 1;
+            maxOfEdges = (int) Math.ceil((v*(v-1)) / 2);
             
             System.out.println("Maximum number of edges:" + maxOfEdges);
-            System.out.println("Minimum number of edges:" + maxOfEdges);
+            System.out.println("Minimum number of edges:" + minOfEdges);
 
             numOfEdges = rand.nextInt(maxOfEdges - minOfEdges) + minOfEdges;
         }
