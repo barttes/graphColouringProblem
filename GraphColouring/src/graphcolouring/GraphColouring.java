@@ -112,11 +112,15 @@ public class GraphColouring {
                     */
                 case 8:
                     vertexColoringOrder = new int[g1.getNumV()];
+                    //check if vertexDegree array has been declared, if not initialize it
+                    if ( g1.getVertexDegree()[g1.getNumV()-1][1] == 0) {
+                        g1.initializeVerticesDegrees();
+                    }
                     
                     for (i=(g1.getNumV()-1); i>=0; i--) {
                         vertexColoringOrder[g1.getNumV()-i-1] = g1.getVertexDegree()[i][0];
                     }
-                             
+                       
                     g1.colorGreedy(vertexColoringOrder);
                     nC = g1.getChromaticNumberFoundGreedyLFBF();
                     
